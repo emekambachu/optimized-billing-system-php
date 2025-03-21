@@ -15,3 +15,24 @@ This project is an optimized billing system for a utility company. It calculates
 ## PHP Version
 - **v8.0 or higher but preferably v8.2**
 
+## Installation
+**Clone the repository:**
+   ```bash
+   git clone https://github.com/emekambachu/optimized-billing-system-php.git
+   cd optimized-billing-system-php
+```
+   
+**Install dependencies:**
+   ```bash
+   composer install
+```
+
+**Run the tests:**
+   ```bash
+   vendor/bin/phpunit --configuration phpunit.xml
+```
+
+**Run the application in docker:**
+   ```bash
+   docker-compose up --build
+```
