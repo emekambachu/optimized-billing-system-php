@@ -20,25 +20,68 @@ class BillingService
     }
 
     /**
-     * Calculates the total bill for a list of meter readings.
+     * Update the billing rates.
+     *
+     * @param float $peakRate
+     * @param float $offPeakRate
+     */
+    public function updateRates(float $peakRate, float $offPeakRate): void
+    {
+        $this->peakRate = $peakRate;
+        $this->offPeakRate = $offPeakRate;
+    }
+
+    /**
+     * Get the current peak rate.
+     *
+     * @return float
+     */
+    public function getPeakRate(): float
+    {
+        return $this->peakRate;
+    }
+
+    /**
+     * Get the current off-peak rate.
+     *
+     * @return float
+     */
+    public function getOffPeakRate(): float
+    {
+        return $this->offPeakRate;
+    }
+
+    /**
+     * Calculates the total bills for each meter (household).
      *
      * @param MeterData[] $meterDataList
-     * @return Bill
+     * @return array<int, Bill>  Associative array with meter_id as key and Bill as value.
      */
-    public function calculateBill(array $meterDataList): Bill
+    public function calculateBills(array $meterDataList): array
     {
-        $totalCost = 0.0;
+        $billingAccumulator = [];
+
         foreach ($meterDataList as $data) {
-            // Convert the timestamp to a time string.
             $timestamp = strtotime($data->timestamp);
             $time = date('H:i', $timestamp);
-            // Determine rate based on time of day.
+
+            // Determine the rate based on the time.
             $rate = ($time >= $this->peakStart && $time <= $this->peakEnd)
                 ? $this->peakRate
                 : $this->offPeakRate;
-            // Multiply usage by rate.
-            $totalCost += $data->meterReading * $rate;
+
+            // Initialize if this meter_id hasn't been encountered.
+            if (!isset($billingAccumulator[$data->meterId])) {
+                $billingAccumulator[$data->meterId] = 0.0;
+            }
+
+            // Accumulate the cost.
+            $billingAccumulator[$data->meterId] += $data->meterReading * $rate;
         }
-        return new Bill($totalCost);
+
+        // Convert to Bill objects.
+        return array_map(static function ($totalCost) {
+            return new Bill($totalCost);
+        }, $billingAccumulator);
     }
 }

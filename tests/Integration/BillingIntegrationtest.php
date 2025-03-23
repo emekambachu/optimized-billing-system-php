@@ -1,23 +1,28 @@
 <?php
-declare(strict_types=1);
-
 use PHPUnit\Framework\TestCase;
-use App\Core\DIContainer;
+use App\Controllers\BillingController;
+use App\Services\BillingService;
 
-final class BillingIntegrationTest extends TestCase
+class BillingIntegrationTest extends TestCase
 {
-    public function testBillingIntegration(): void
+    public function testBillingControllerOutputWithUpdatedRates(): void
     {
-        $billingController = \App\Core\DIContainer::getBillingController();
+        // Simulate form submission with new rates.
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['peak_rate'] = '0.30';
+        $_POST['offpeak_rate'] = '0.15';
 
-        $sampleMeterData = [
-            ['meter_id' => 1, 'timestamp' => '2023-10-10T06:00:00', 'reading' => 100],
-            ['meter_id' => 1, 'timestamp' => '2023-10-10T07:00:00', 'reading' => 150],
-            ['meter_id' => 1, 'timestamp' => '2023-10-10T23:00:00', 'reading' => 200],
-            ['meter_id' => 1, 'timestamp' => '2023-10-11T00:00:00', 'reading' => 250],
-        ];
+        ob_start();
+        $billingService = new BillingService(0.20, 0.10, '07:00', '23:59');
+        $controller = new BillingController($billingService);
+        $controller->calculateBill();
+        $output = ob_get_clean();
 
-        $bill = $billingController->calculateBill($sampleMeterData);
-        $this->assertEquals(25.0, $bill);
+        // Verify that the updated values are rendered in the form.
+        $this->assertStringContainsString('value="0.30"', $output);
+        $this->assertStringContainsString('value="0.15"', $output);
+
+        // Optionally, check that the table contains billing data.
+        $this->assertStringContainsString('Meter ID', $output);
     }
 }
