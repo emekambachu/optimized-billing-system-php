@@ -17,6 +17,8 @@ class BillingService
         $this->offPeakRate = $offPeakRate;
         $this->peakStart = $peakStart;
         $this->peakEnd = $peakEnd;
+
+//        print_r(func_get_args());
     }
 
     /**

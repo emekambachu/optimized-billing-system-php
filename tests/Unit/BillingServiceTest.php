@@ -11,9 +11,8 @@ class BillingServiceTest extends TestCase
         $this->service = new BillingService(0.20, 0.10, '07:00', '23:59');
     }
 
-    public function testUpdateRatesThrowsExceptionForNegative(): void
+    public function testUpdateRatesThrowsExceptionForNegativeValues(): void
     {
-
         $this->expectException(\InvalidArgumentException::class);
         $this->service->updateRates(-0.30, 0.10);
     }

@@ -44,7 +44,13 @@ This project is an optimized billing system for a utility company. It calculates
    http://localhost:8000
 ```
 
-**Run the tests:**
+**Run the tests on windows:**
    ```bash
    vendor\bin\phpunit
+```
+
+**Run the tests inside docker container:**
+   ```bash
+   docker-compose exec app bash
+   vendor/bin/phpunit
 ```
