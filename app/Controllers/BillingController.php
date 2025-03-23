@@ -14,38 +14,69 @@ class BillingController
     }
 
     /**
-     * Retrieves meter data, updates rates if provided, calculates the bills per meter_id, and renders the view.
+     * Retrieves meter data from a JSON file, updates rates if provided, calculates the bills per meter_id,
+     * and renders the view. Catches exceptions to report errors.
      */
     public function calculateBill(): void
     {
-        // Check if the form has been submitted.
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $newPeakRate = isset($_POST['peak_rate']) ? (float) $_POST['peak_rate'] : $this->billingService->getPeakRate();
-            $newOffPeakRate = isset($_POST['offpeak_rate']) ? (float) $_POST['offpeak_rate'] : $this->billingService->getOffPeakRate();
-            $this->billingService->updateRates($newPeakRate, $newOffPeakRate);
+        $errorMessage = null;
+        try {
+            // Update rates if form is submitted.
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (isset($_POST['peak_rate'], $_POST['offpeak_rate'])) {
+                    if (!is_numeric($_POST['peak_rate']) || (float)$_POST['peak_rate'] < 0) {
+                        throw new \Exception("Invalid peak rate provided.");
+                    }
+                    if (!is_numeric($_POST['offpeak_rate']) || (float)$_POST['offpeak_rate'] < 0) {
+                        throw new \Exception("Invalid off-peak rate provided.");
+                    }
+                    $newPeakRate = (float) $_POST['peak_rate'];
+                    $newOffPeakRate = (float) $_POST['offpeak_rate'];
+                    $this->billingService->updateRates($newPeakRate, $newOffPeakRate);
+                } else {
+                    throw new \Exception("Rates are not provided.");
+                }
+            }
+
+            // Load meter data from JSON file.
+            $jsonFilePath = __DIR__ . '/../../data/meterdata.json';
+            if (!file_exists($jsonFilePath)) {
+                throw new \Exception("Meter data JSON file not found.");
+            }
+
+            $jsonData = file_get_contents($jsonFilePath);
+            if ($jsonData === false) {
+                throw new \Exception("Failed to read meter data JSON file.");
+            }
+
+            $dataArray = json_decode($jsonData, true);
+            if ($dataArray === null) {
+                throw new \Exception("Invalid JSON data in meter data file.");
+            }
+
+            // Convert JSON records into MeterData objects.
+            $meterDataList = [];
+            foreach ($dataArray as $record) {
+                if (!isset($record['meter_id'], $record['timestamp'], $record['meter_reading'])) {
+                    throw new \Exception("Invalid record in meter data file.");
+                }
+                $meterDataList[] = new MeterData(
+                    (int)$record['meter_id'],
+                    $record['timestamp'],
+                    (float)$record['meter_reading']
+                );
+            }
+
+            // Calculate bills grouped by meter_id.
+            $bills = $this->billingService->calculateBills($meterDataList);
+            $currentPeakRate = $this->billingService->getPeakRate();
+            $currentOffPeakRate = $this->billingService->getOffPeakRate();
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $bills = [];
+            $currentPeakRate = $this->billingService->getPeakRate();
+            $currentOffPeakRate = $this->billingService->getOffPeakRate();
         }
-
-        // Example meter data with different meter_id values.
-        $meterDataList = [
-            // For household with meter_id 1:
-            new MeterData(1, '2023-10-10T08:00:00', 150),  // Peak hour
-            new MeterData(1, '2023-10-10T01:00:00', 100),  // Off-peak hour
-
-            // For household with meter_id 2:
-            new MeterData(2, '2023-10-10T09:00:00', 200),  // Peak hour
-            new MeterData(2, '2023-10-10T03:00:00', 80),   // Off-peak hour
-
-            // For household with meter_id 3:
-            new MeterData(3, '2023-10-10T22:00:00', 120),  // Peak hour
-            new MeterData(3, '2023-10-10T05:00:00', 70)    // Off-peak hour
-        ];
-
-        // Calculate bills grouped by meter_id.
-        $bills = $this->billingService->calculateBills($meterDataList);
-
-        // Pass the current rates to the view.
-        $currentPeakRate = $this->billingService->getPeakRate();
-        $currentOffPeakRate = $this->billingService->getOffPeakRate();
 
         require __DIR__ . '/../Views/billingView.php';
     }

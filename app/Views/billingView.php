@@ -5,8 +5,12 @@
     <title>Electricity Bills</title>
 </head>
 <body>
-
 <h1>Update Billing Rates</h1>
+
+<?php if (isset($errorMessage) && $errorMessage !== null): ?>
+    <p style="color:red;">Error: <?= htmlspecialchars($errorMessage) ?></p>
+<?php endif; ?>
+
 <form method="POST" action="">
     <label for="peak_rate">Peak Rate ($/kWh):</label>
     <input type="number" step="0.01" id="peak_rate" name="peak_rate" value="<?= htmlspecialchars($currentPeakRate) ?>" required>
@@ -26,12 +30,18 @@
     </tr>
     </thead>
     <tbody>
-    <?php foreach ($bills as $meterId => $bill): ?>
+    <?php if (empty($bills)): ?>
         <tr>
-            <td><?= htmlspecialchars($meterId) ?></td>
-            <td><?= number_format($bill->totalCost, 2) ?></td>
+            <td colspan="2">No billing data available.</td>
         </tr>
-    <?php endforeach; ?>
+    <?php else: ?>
+        <?php foreach ($bills as $meterId => $bill): ?>
+            <tr>
+                <td><?= htmlspecialchars($meterId) ?></td>
+                <td><?= number_format($bill->totalCost, 2) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
     </tbody>
 </table>
 </body>

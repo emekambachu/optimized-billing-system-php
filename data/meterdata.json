@@ -1,0 +1,8 @@
+[
+  {"meter_id": 1, "timestamp": "2023-10-10T08:00:00", "meter_reading": 150},
+  {"meter_id": 1, "timestamp": "2023-10-10T01:00:00", "meter_reading": 100},
+  {"meter_id": 2, "timestamp": "2023-10-10T09:00:00", "meter_reading": 200},
+  {"meter_id": 2, "timestamp": "2023-10-10T03:00:00", "meter_reading": 80},
+  {"meter_id": 3, "timestamp": "2023-10-10T22:00:00", "meter_reading": 120},
+  {"meter_id": 3, "timestamp": "2023-10-10T05:00:00", "meter_reading": 70}
+]

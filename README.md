@@ -5,8 +5,11 @@ This project is an optimized billing system for a utility company. It calculates
 ## Features
 
 - **MVC Architecture:** Used clean separation of concerns.
-- **Billing Calculation:** Used the Strategy pattern for peak and off-peak rate calculations.
-- **Dependency Injection:** Used dependency injection for decoupled and testable code.
+- **Billing Algorithm**: Groups meter data by meter_id and calculates individual bills.
+- **Dynamic Rate Update**: Update peak and off-peak rates directly from the web page using an input form.
+- **JSON Data Source**: Meter data is populated from a JSON file.
+- **Error Handling**: Uses try–catch blocks and error reporting to manage invalid input or file errors.
+- **Dependency Injection**: Uses constructor injection for services.
 - **Testing:** Installed and used php unit version 9.5 for Unit and Integration test.
 - **Containerization:** Installed and setup Docker and Docker Compose configurations are included.
 - **Modern PHP Practices:** Adhered to Sensible type declarations, encapsulation, and PSR-12.
