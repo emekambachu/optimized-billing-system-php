@@ -1,61 +1,44 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Services;
 
 use App\Models\MeterData;
+use App\Models\Bill;
 
 class BillingService
 {
-    private RateStrategyInterface $peakStrategy;
-    private RateStrategyInterface $offPeakStrategy;
-    private int $peakStart;
-    private int $peakEnd;
+    private float $peakRate;
+    private float $offPeakRate;
+    private string $peakStart;
+    private string $peakEnd;
 
-    public function __construct(
-        RateStrategyInterface $peakStrategy,
-        RateStrategyInterface $offPeakStrategy,
-        int $peakStart = 7,
-        int $peakEnd = 24
-    ) {
-        $this->peakStrategy = $peakStrategy;
-        $this->offPeakStrategy = $offPeakStrategy;
+    public function __construct(float $peakRate, float $offPeakRate, string $peakStart = '07:00', string $peakEnd = '23:59')
+    {
+        $this->peakRate = $peakRate;
+        $this->offPeakRate = $offPeakRate;
         $this->peakStart = $peakStart;
         $this->peakEnd = $peakEnd;
     }
 
     /**
-     * Calculates the total bill from an array of MeterData.
-     * It computes usage as the difference between consecutive readings and
-     * multiplies by the appropriate rate depending on the hour.
+     * Calculates the total bill for a list of meter readings.
      *
-     * @param MeterData[] $meterDataArray
-     * @return float
+     * @param MeterData[] $meterDataList
+     * @return Bill
      */
-    public function calculateTotalBill(array $meterDataArray): float
+    public function calculateBill(array $meterDataList): Bill
     {
-        $totalBill = 0.0;
-        // Ensure the data is sorted by timestamp
-        usort($meterDataArray, function (MeterData $a, MeterData $b) {
-            return $a->getTimestamp() <=> $b->getTimestamp();
-        });
-
-        // Loop through the readings (starting from the second record)
-        for ($i = 1, $n = count($meterDataArray); $i < $n; $i++) {
-            $previous = $meterDataArray[$i - 1];
-            $current  = $meterDataArray[$i];
-            $usage = $current->getReading() - $previous->getReading();
-
-            // Determine if current timestamp falls in peak or off-peak hours
-            $hour = (int)$current->getTimestamp()->format('G');
-            if ($hour >= $this->peakStart && $hour < $this->peakEnd) {
-                $rate = $this->peakStrategy->getRate($current->getTimestamp());
-            } else {
-                $rate = $this->offPeakStrategy->getRate($current->getTimestamp());
-            }
-
-            $totalBill += $usage * $rate;
+        $totalCost = 0.0;
+        foreach ($meterDataList as $data) {
+            // Convert the timestamp to a time string.
+            $timestamp = strtotime($data->timestamp);
+            $time = date('H:i', $timestamp);
+            // Determine rate based on time of day.
+            $rate = ($time >= $this->peakStart && $time <= $this->peakEnd)
+                ? $this->peakRate
+                : $this->offPeakRate;
+            // Multiply usage by rate.
+            $totalCost += $data->meterReading * $rate;
         }
-        return $totalBill;
+        return new Bill($totalCost);
     }
 }
