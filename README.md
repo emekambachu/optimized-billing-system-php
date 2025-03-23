@@ -46,5 +46,5 @@ This project is an optimized billing system for a utility company. It calculates
 
 **Run the tests:**
    ```bash
-   vendor/bin/phpunit --configuration phpunit.xml
+   vendor\bin\phpunit
 ```
