@@ -24,21 +24,25 @@ class BillingController
             // Update rates if form is submitted.
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($_POST['peak_rate'], $_POST['offpeak_rate'])) {
+
                     if (!is_numeric($_POST['peak_rate']) || (float)$_POST['peak_rate'] < 0) {
                         throw new \RuntimeException("Invalid peak rate provided.");
                     }
                     if (!is_numeric($_POST['offpeak_rate']) || (float)$_POST['offpeak_rate'] < 0) {
                         throw new \RuntimeException("Invalid off-peak rate provided.");
                     }
+
                     $newPeakRate = (float) $_POST['peak_rate'];
                     $newOffPeakRate = (float) $_POST['offpeak_rate'];
                     $this->billingService->updateRates($newPeakRate, $newOffPeakRate);
+
                 } else {
                     throw new \RuntimeException("Rates are not provided.");
                 }
             }
 
-            // Load meter data from JSON file (This can be from an API or database)
+            // Load meter data from JSON file (This can be from an API or database,
+            // but for this test we are using a JSON file).
             $jsonFilePath = __DIR__ . '/../../data/meterdata.json';
             if (!file_exists($jsonFilePath)) {
                 throw new \RuntimeException("Meter data JSON file not found.");

@@ -27,6 +27,9 @@ class BillingService
      */
     public function updateRates(float $peakRate, float $offPeakRate): void
     {
+        if($peakRate < 0 || $offPeakRate < 0) {
+            throw new \InvalidArgumentException("Rates cannot be negative.");
+        }
         $this->peakRate = $peakRate;
         $this->offPeakRate = $offPeakRate;
     }
