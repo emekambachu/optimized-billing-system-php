@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// Stored rates and peak hours in a config file since i'm not using a database
+// Stored rates and peak hours in a config file since I'm not using a database
 return [
     'rates' => [
         'peak' => 0.20,

@@ -9,7 +9,6 @@ use App\Models\MeterData;
 class BillingController
 {
     private BillingService $billingService;
-
     public function __construct(BillingService $billingService)
     {
         $this->billingService = $billingService;
@@ -18,6 +17,7 @@ class BillingController
     /**
      * Accepts an array of meter data (as associative arrays),
      * converts them to MeterData objects, and calculates the bill.
+     * @throws \DateMalformedStringException
      */
     public function calculateBill(array $meterDataArray): float
     {
