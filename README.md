@@ -29,12 +29,6 @@ This project is an optimized billing system for a utility company. It calculates
    ```bash
    composer install
 ```
-
-**Run the tests:**
-   ```bash
-   vendor/bin/phpunit --configuration phpunit.xml
-```
-
 **Run the application in docker:**
    ```bash
    docker-compose up --build
@@ -48,4 +42,9 @@ This project is an optimized billing system for a utility company. It calculates
 **Access the application:**
    ```bash
    http://localhost:8000
+```
+
+**Run the tests:**
+   ```bash
+   vendor/bin/phpunit --configuration phpunit.xml
 ```
