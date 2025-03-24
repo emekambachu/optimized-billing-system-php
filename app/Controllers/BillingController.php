@@ -25,12 +25,9 @@ class BillingController
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($_POST['peak_rate'], $_POST['offpeak_rate'])) {
 
-                    if (!is_numeric($_POST['peak_rate']) || (float)$_POST['peak_rate'] < 0) {
-                        throw new \RuntimeException("Invalid peak rate provided.");
-                    }
-                    if (!is_numeric($_POST['offpeak_rate']) || (float)$_POST['offpeak_rate'] < 0) {
-                        throw new \RuntimeException("Invalid off-peak rate provided.");
-                    }
+                    // Validate rates
+                    $this->billingService->validateRate((float)$_POST['peak_rate']);
+                    $this->billingService->validateRate((float)$_POST['offpeak_rate']);
 
                     $newPeakRate = (float) $_POST['peak_rate'];
                     $newOffPeakRate = (float) $_POST['offpeak_rate'];

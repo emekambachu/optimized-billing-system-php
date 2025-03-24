@@ -17,8 +17,13 @@ class BillingService
         $this->offPeakRate = $offPeakRate;
         $this->peakStart = $peakStart;
         $this->peakEnd = $peakEnd;
+    }
 
-//        print_r(func_get_args());
+    public function validateRate(float $rate): void
+    {
+        if(!is_numeric($rate) || $rate < 0) {
+            throw new \InvalidArgumentException("Rate must be numeric and non-negative.");
+        }
     }
 
     /**
